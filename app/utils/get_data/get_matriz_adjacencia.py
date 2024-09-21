@@ -16,9 +16,9 @@ for _, row in df.iterrows():
     matriz_adjacencia[idx1, idx2] = peso
     matriz_adjacencia[idx2, idx1] = peso
 
-with open("matriz_adjacencia.txt", "w") as f:
+with open("app/data/matriz_adjacencia.txt", "w") as f:
     for linha in matriz_adjacencia:
         linha_txt = ", ".join(map(str, linha))
         f.write(linha_txt + "\n")
 
-print("Matriz de adjacência com pesos salva em 'matriz_adjacencia.txt'.")
+print("Matriz de adjacência com pesos salva em 'app/data/matriz_adjacencia.txt'.")
