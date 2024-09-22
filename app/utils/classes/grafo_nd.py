@@ -22,7 +22,6 @@ class TGrafoND:
         EXIBE A MATRIZ DE ADJACÊNCIA DO GRAFO.
         """
 
-
         if self.grafo:
             logger.info("A MATRIZ DE ADJACÊNCIA É: ")
             print(f"\n{'     ':^2}" + f" ".join([f"{i:^2}" for i in range(self.vertices)]))
@@ -106,11 +105,6 @@ class TGrafoND:
 
     def removeVertice(self, vertice: int):
         """
-        9)	Fazer um método que permita remover um vértice do Grafo (não dirigido e dirigido).
-        Não se esqueça de remover as arestas associadas
-
-        ---
-
         REMOVE UM VÉRTICE DE UM GRAFO NÃO-DIRECIONADO E TODAS AS ARESTAS ASSOCIADAS.
 
         Args:
@@ -129,7 +123,7 @@ class TGrafoND:
 
         # INFORMA A REMOÇÃO E MOSTRA A MATRIZ DE ADJACÊNCIA ATUALIZADA
         logger.success(
-            f"VÉRTICE {vertice + 1} E TODAS AS ARESTAS ASSOCIADAS FORAM REMOVIDAS (NÃO DIRECIONADO)."
+            f"VÉRTICE {vertice + 1} E TODAS AS ARESTAS ASSOCIADAS FORAM REMOVIDAS."
         )
 
     def leArquivo(self, arquivo: str):
@@ -143,11 +137,9 @@ class TGrafoND:
             with open(arquivo, "r") as f:
                 linhas = f.readlines()
 
-            # Lê o número de vértices
             self.vertices = int(linhas[1].strip())
             self.grafo = [[0] * self.vertices for _ in range(self.vertices)]
 
-            # Lê as arestas e os livros
             for linha in linhas[2 : self.vertices + 2]:
                 dados = linha.strip().split(' "')
                 if len(dados) >= 2:
@@ -164,7 +156,7 @@ class TGrafoND:
                 )
                 self.insereAresta(vertice_origem, vertice_destino, peso)
 
-            logger.info("GRAFO CARREGADO COM SUCESSO A PARTIR DO ARQUIVO.")
+            logger.success("GRAFO CARREGADO COM SUCESSO A PARTIR DO ARQUIVO.")
 
             self.imprimeGrafo()
 
@@ -177,8 +169,9 @@ class TGrafoND:
         """
         EXIBE O CONTEÚDO ATUAL DO GRAFO DE FORMA VISUALMENTE COMPREENSÍVEL E ATRAENTE.
         """
-        print("---------------------------------------------------------------")
-        print(f"Tipo do Grafo: Não Direcionado")
+
+        print("===============================================================")
+        print(f"Tipo do Grafo: Não Orientado com peso nas arestas")
         print(f"Número de Vértices: {self.vertices}")
         print("---------------------------------------------------------------")
 
@@ -211,15 +204,12 @@ class TGrafoND:
         """
         try:
             with open(arquivo, 'w') as f:
-                # Escreve o número estático 2 e o número de vértices
                 f.write(f"2\n")
                 f.write(f"{self.vertices}\n")
 
-                # Escreve os vértices e seus respectivos nomes
                 for vertice, nome_livro in self.livros.items():
                     f.write(f'{vertice} "{nome_livro}"\n')
 
-                # Conta o número de arestas e grava cada uma
                 num_arestas = 0
                 arestas = []
                 for i in range(self.vertices):
@@ -228,10 +218,8 @@ class TGrafoND:
                             num_arestas += 1
                             arestas.append(f"{i} {j} {self.grafo[i][j]}\n")
 
-                # Escreve o número de arestas
                 f.write(f"{num_arestas}\n")
 
-                # Escreve cada aresta
                 for aresta in arestas:
                     f.write(aresta)
 
@@ -258,93 +246,105 @@ class TGrafoND:
             Args:
                 v (int): O ÍNDICE DO VÉRTICE DE PARTIDA PARA A BUSCA EM PROFUNDIDADE.
             """
-            visitados[v] = True
+            visitados[v] = True  # MARCA O VÉRTICE ATUAL COMO VISITADO
             # PERCORRE OS VÉRTICES VIZINHOS DO VÉRTICE ATUAL
             for i in range(self.vertices):
                 # SE HÁ UMA ARESTA E O VÉRTICE AINDA NÃO FOI VISITADO, CONTINUA A BUSCA
                 if self.grafo[v][i] == 1 and not visitados[i]:
-                    busca_profundidade(i)
+                    busca_profundidade(i)  # CHAMA A FUNÇÃO RECURSIVAMENTE PARA O VIZINHO
 
         # INICIA A BUSCA EM PROFUNDIDADE A PARTIR DO VÉRTICE 0
         busca_profundidade(0)
 
         # VERIFICA SE TODOS OS VÉRTICES FORAM VISITADOS
         if all(visitados):
-            logger.info("GRAFO É CONEXO")
+            logger.info("GRAFO É CONEXO")  # MENSAGEM DE QUE O GRAFO É CONEXO
             return 0  # O GRAFO É CONEXO
         else:
-            logger.info("GRAFO É DESCONEXO")
+            logger.info("GRAFO É DESCONEXO")  # MENSAGEM DE QUE O GRAFO É DESCONEXO
             return 1  # O GRAFO É DESCONEXO
-    
+
     def bfs(self, vertice_inicial: int, visitado: list) -> set:
         """
-        Realiza uma busca em largura (BFS) a partir de um vértice inicial.
-        Retorna o conjunto de vértices que pertencem à mesma componente conectada.
-        """
-        fila = deque([vertice_inicial])
-        visitado[vertice_inicial] = True
-        componente = {vertice_inicial}
+        REALIZA UMA BUSCA EM LARGURA (BFS) A PARTIR DE UM VÉRTICE INICIAL.
+        RETORNA O CONJUNTO DE VÉRTICES QUE PERTENCEM À MESMA COMPONENTE CONECTADA.
 
-        while fila:
-            v = fila.popleft()
+        Args:
+            vertice_inicial (int): O VÉRTICE DE PARTIDA PARA A BUSCA EM LARGURA.
+            visitado (list): LISTA QUE CONTROLA OS VÉRTICES VISITADOS.
+
+        Returns:
+            set: CONJUNTO DE VÉRTICES DA COMPONENTE CONECTADA.
+        """
+        fila = deque([vertice_inicial])  # INICIA A FILA COM O VÉRTICE INICIAL
+        visitado[vertice_inicial] = True  # MARCA O VÉRTICE INICIAL COMO VISITADO
+        componente = {vertice_inicial}  # INICIALIZA O CONJUNTO DA COMPONENTE
+
+        while fila:  # ENQUANTO HOUVER VÉRTICES NA FILA
+            v = fila.popleft()  # REMOVE O VÉRTICE DO INÍCIO DA FILA
 
             for i in range(self.vertices):
-                if self.grafo[v][i] != 0 and not visitado[i]:
-                    fila.append(i)
-                    visitado[i] = True
-                    componente.add(i)
+                if self.grafo[v][i] != 0 and not visitado[i]:  # SE HÁ UMA ARESTA E O VIZINHO NÃO FOI VISITADO
+                    fila.append(i)  # ADICIONA O VIZINHO À FILA
+                    visitado[i] = True  # MARCA O VIZINHO COMO VISITADO
+                    componente.add(i)  # ADICIONA O VIZINHO À COMPONENTE
 
-        return componente
+        return componente  # RETORNA O CONJUNTO DE VÉRTICES DA COMPONENTE
 
     def componentesConectadas(self) -> list:
         """
-        Encontra todas as componentes conectadas do grafo.
-        Retorna uma lista de conjuntos, onde cada conjunto representa uma componente conectada.
+        ENCONTRA TODAS AS COMPONENTES CONECTADAS DO GRAFO.
+        RETORNA UMA LISTA DE CONJUNTOS, ONDE CADA CONJUNTO REPRESENTA UMA COMPONENTE CONECTADA.
+
+        Returns:
+            list: LISTA DE COMPONENTES CONECTADAS.
         """
-        visitado = [False] * self.vertices
-        componentes = []
+        visitado = [False] * self.vertices  # INICIALIZA A LISTA DE VISITADOS
+        componentes = []  # LISTA PARA ARMAZENAR AS COMPONENTES ENCONTRADAS
 
         for v in range(self.vertices):
-            if not visitado[v]:
-                componente = self.bfs(v, visitado)
-                componentes.append(componente)
+            if not visitado[v]:  # SE O VÉRTICE AINDA NÃO FOI VISITADO
+                componente = self.bfs(v, visitado)  # REALIZA A BUSCA EM LARGURA
+                componentes.append(componente)  # ADICIONA A COMPONENTE À LISTA
 
-        return componentes
+        return componentes  # RETORNA A LISTA DE COMPONENTES CONECTADAS
+
 
     def grafo_reduzido(self):
         """
-        Gera o grafo reduzido com base nas componentes conectadas do grafo original.
-        O grafo reduzido contém um vértice para cada componente conectada, e uma aresta
-        entre duas componentes se houver pelo menos uma aresta conectando dois vértices de componentes distintas no grafo original.
+        GERA O GRAFO REDUZIDO COM BASE NAS COMPONENTES CONECTADAS DO GRAFO ORIGINAL.
+        O GRAFO REDUZIDO CONTÉM UM VÉRTICE PARA CADA COMPONENTE CONECTADA, E UMA ARESTA
+        ENTRE DUAS COMPONENTES SE HOUVER PELO MENOS UMA ARESTA CONECTANDO DOIS VÉRTICES DE COMPONENTES DISTINTAS NO GRAFO ORIGINAL.
         """
         
-        # Encontra todas as componentes conectadas
+        # ENCONTRA TODAS AS COMPONENTES CONECTADAS
         componentes = self.componentesConectadas()
         num_componentes = len(componentes)
 
-        # Cria a matriz de adjacência do grafo reduzido
+        # CRIA A MATRIZ DE ADJACÊNCIA DO GRAFO REDUZIDO
         grafo_reduzido = [[0] * num_componentes for _ in range(num_componentes)]
 
-        # Mapeamento dos vértices para seus componentes conectados
+        # MAPEAMENTO DOS VÉRTICES PARA SEUS COMPONENTES CONECTADOS
         vertice_para_componente = {}
         for idx, componente in enumerate(componentes):
             for vertice in componente:
                 vertice_para_componente[vertice] = idx
 
-        # Conecta as componentes no grafo reduzido
+        # CONECTA AS COMPONENTES NO GRAFO REDUZIDO
         for v1 in range(self.vertices):
             for v2 in range(v1 + 1, self.vertices):
-                if self.grafo[v1][v2] != 0:
-                    comp_v1 = vertice_para_componente[v1]
-                    comp_v2 = vertice_para_componente[v2]
-                    if comp_v1 != comp_v2:
-                        # Aresta entre componentes diferentes no grafo original -> Aresta no grafo reduzido
+                if self.grafo[v1][v2] != 0:  # VERIFICA SE EXISTE UMA ARESTA ENTRE v1 E v2
+                    comp_v1 = vertice_para_componente[v1]  # OBTÉM A COMPONENTE DE v1
+                    comp_v2 = vertice_para_componente[v2]  # OBTÉM A COMPONENTE DE v2
+                    if comp_v1 != comp_v2:  # SE AS COMPONENTES FOREM DIFERENTES
+                        # ARESTA ENTRE COMPONENTES DIFERENTES NO GRAFO ORIGINAL -> ARESTA NO GRAFO REDUZIDO
                         grafo_reduzido[comp_v1][comp_v2] = 1
                         grafo_reduzido[comp_v2][comp_v1] = 1
 
-        # Exibe o grafo reduzido
-        logger.info("Grafo reduzido (matriz de adjacência):")
+        # EXIBE O GRAFO REDUZIDO
+        logger.info("GRAFO REDUZIDO:")
         for linha in grafo_reduzido:
             print(linha)
 
-        return grafo_reduzido
+        return grafo_reduzido  # RETORNA A MATRIZ DE ADJACÊNCIA DO GRAFO REDUZIDO
+
