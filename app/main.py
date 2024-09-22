@@ -1,3 +1,20 @@
+"""
+Biblioteca Conectada: Explorando Relações entre Livros
+
+Membros do Grupo:
+1. Gabriella Silveira Braz - 10402554
+2. Giovana Liao - 10402264
+3. Maria Julia de Pádua - 10400630
+
+Síntese do Conteúdo:
+Este código implementa uma aplicação que permite a interação com um grafo 
+representando livros, onde os vértices são os livros e as arestas 
+representam a similaridade entre eles. O usuário pode realizar diversas 
+operações, como ler e gravar dados, inserir e remover vértices e arestas, 
+além de visualizar o grafo e suas características.
+
+"""
+
 import sys
 
 from time import sleep
@@ -15,14 +32,24 @@ except ModuleNotFoundError:
 
 
 def main(graph_object: TGrafoND):
+    """FUNÇÃO PRINCIPAL DA APLICAÇÃO.
+
+    Args:
+        graph_object (TGrafoND): OBJETO DA CLASSE TGrafoND.
+    """
 
     while True:
 
         # EXIBE O MENU DE OPÇÕES PARA O USUÁRIO
         print(
-            """\nEscolha uma das opções abaixo:
-1) Ler dados do arquivo grafo.txt
-2) Gravar dados no arquivo grafo.txt
+            """\n
+=======================================================
+BIBLIOTECA CONECTADA: Explorando Relações entre Livros
+=======================================================
+
+Escolha uma das opções abaixo:
+1) Ler dados do arquivo grafo_input.txt
+2) Gravar dados no arquivo grafo_output.txt
 3) Inserir vértice
 4) Inserir aresta
 5) Remover vértice
@@ -39,11 +66,11 @@ def main(graph_object: TGrafoND):
 
         # LER DADOS DO ARQUIVO
         if opcao == "1":
-            graph_object.leArquivo(arquivo="app/data/grafo.txt")
+            graph_object.leArquivo(arquivo="app/data/grafo_input.txt")
 
         # GRAVAR DADOS NO ARQUIVO
         elif opcao == "2":
-            graph_object.gravarGrafo(arquivo="app/data/grafo_gravado.txt")
+            graph_object.gravarGrafo(arquivo="app/data/grafo_output.txt")
 
         # INSERIR UM VÉRTICE
         elif opcao == "3":

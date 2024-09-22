@@ -1,5 +1,27 @@
-from loguru import logger
+"""
+Biblioteca Conectada: Explorando Relações entre Livros
+
+Membros do Grupo:
+1. Gabriella Silveira Braz - 10402554
+2. Giovana Liao - 10402264
+3. Maria Julia de Pádua - 10400630
+
+Síntese do Conteúdo:
+A classe `TGrafoND` implementa um grafo não dirigido utilizando uma matriz 
+de adjacência, onde os vértices representam livros e as arestas representam 
+relações entre eles, com pesos que podem indicar similaridade ou conexão. 
+A classe inclui métodos para manipulação do grafo, como a inserção e remoção 
+de vértices e arestas, leitura de dados de um arquivo, e exibição da matriz de 
+adjacência. Também possui funcionalidades para verificar a conectividade do grafo, 
+utilizando busca em profundidade e em largura, e para identificar e exibir as 
+componentes conectadas. Por fim, é capaz de gerar um grafo reduzido que representa 
+as componentes conectadas do grafo original, mostrando como as diferentes partes 
+do grafo estão interligadas.
+"""
+
 from collections import deque
+
+from loguru import logger
 
 class TGrafoND:
     def __init__(self):
@@ -182,12 +204,12 @@ class TGrafoND:
         print("---------------------------------------------------------------")
         print("\nArestas (conexões entre os vértices) e seus respectivos pesos:")
         arestas = []
-        for i in range(self.vertices):
-            for j in range(i + 1, self.vertices):  # Para não repetir arestas
+        for i in range(self.vertices-1):
+            for j in range(i + 1, self.vertices-1):  # Para não repetir arestas
                 if self.grafo[i][j] != 0:
                     arestas.append((i + 1, j + 1, self.grafo[i][j]))
                     print(
-                        f"- {self.livros[i + 1].replace('"', "")} - {self.livros[self.grafo[i][j]].replace('"', "")} ---> Com peso: {j + 1}"
+                        f"- {self.livros[i + 1]} - {self.livros[j]} ---> Com peso: {j + 1}"
                     )
 
         if not arestas:
@@ -208,7 +230,7 @@ class TGrafoND:
                 f.write(f"{self.vertices}\n")
 
                 for vertice, nome_livro in self.livros.items():
-                    f.write(f'{vertice} "{nome_livro}"\n')
+                    f.write(f'{vertice} "{nome_livro.replace('"', "")}"\n')
 
                 num_arestas = 0
                 arestas = []
