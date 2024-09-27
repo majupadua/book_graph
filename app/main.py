@@ -66,11 +66,11 @@ Escolha uma das opções abaixo:
 
         # LER DADOS DO ARQUIVO
         if opcao == "1":
-            graph_object.leArquivo(arquivo="app/data/grafo_input.txt")
+            graph_object.leArquivo(arquivo="app/data/grafo_raw_2.txt")
 
         # GRAVAR DADOS NO ARQUIVO
         elif opcao == "2":
-            graph_object.gravarGrafo(arquivo="app/data/grafo_output.txt")
+            graph_object.gravarGrafo(arquivo="app/data/grafo.txt")
 
         # INSERIR UM VÉRTICE
         elif opcao == "3":

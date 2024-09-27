@@ -3,7 +3,7 @@ import pandas as pd
 file_path = "app/aux_data/base_pesos.xlsx"
 xls = pd.ExcelFile(file_path)
 
-df = pd.read_excel(file_path)
+df = pd.read_excel(file_path, sheet_name="Sheet2")
 
 grafo_tipo = 2
 vertices = list(set(df["Livro 1"].tolist() + df["Livro 2"].tolist()))

@@ -115,12 +115,12 @@ class TGrafoND:
         INSERE UM NOVO VÉRTICE NO GRAFO.
         """
 
-        # ADICIONA UMA NOVA LINHA E COLUNA COM 0 PARA A NOVA MATRIZ DE ADJACÊNCIA
-        for i in range(self.vertices):
-            self.grafo[i].append(0)
-        self.grafo.append([0] * self.vertices)
-
         self.vertices += 1
+
+        # ADICIONA UMA NOVA LINHA E COLUNA COM 0 PARA A NOVA MATRIZ DE ADJACÊNCIA
+        self.grafo.append([0] * self.vertices)
+        for i in range(self.vertices-1):
+            self.grafo[i].append(0)
 
         self.imprimeGrafo()
         logger.info(f"VÉRTICE {self.vertices-1} INSERIDO COM SUCESSO.")
@@ -145,7 +145,7 @@ class TGrafoND:
 
         # INFORMA A REMOÇÃO E MOSTRA A MATRIZ DE ADJACÊNCIA ATUALIZADA
         logger.success(
-            f"VÉRTICE {vertice + 1} E TODAS AS ARESTAS ASSOCIADAS FORAM REMOVIDAS."
+            f"VÉRTICE {vertice} E TODAS AS ARESTAS ASSOCIADAS FORAM REMOVIDAS."
         )
 
     def leArquivo(self, arquivo: str):
