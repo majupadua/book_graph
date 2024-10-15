@@ -20,7 +20,7 @@ do grafo estão interligadas.
 """
 
 from collections import deque
-
+from collections import defaultdict
 from loguru import logger
 
 class TGrafoND:
@@ -35,8 +35,7 @@ class TGrafoND:
 
         # INICIALIZA O NÚMERO DE VÉRTICES
         self.vertices = 0
-        # CRIA A MATRIZ DE ADJACÊNCIA COM TODOS OS VALORES INICIALIZADOS EM 0
-        self.grafo = []
+        self.grafo = defaultdict(list)
         self.livros = {}
 
     def imprimeGrafo(self):
@@ -45,27 +44,22 @@ class TGrafoND:
         """
 
         if self.grafo:
-            logger.info("A MATRIZ DE ADJACÊNCIA É: ")
-            print(f"\n{'     ':^2}" + f" ".join([f"{i:^2}" for i in range(self.vertices)]))
-            print(f"{'     ':^2}" + f" ".join([f"{'-':^2}" for _ in range(self.vertices)]))
-            for i in range(self.vertices):
-                aux = []
-                for peso in self.grafo[i]:
-                    aux.append(f"{str(peso):^2}")
-                print(f"{i:^2} | {' '.join(aux)}")
+            logger.info("A LISTA DE ADJACÊNCIA É:")
+            for vertice, vizinhos in self.grafo.items():
+                vizinhos_str = " -> ".join([f"{v} (peso {p})" for v, p in vizinhos])
+                print(f"{vertice}: {vizinhos_str}")
         else:
-            logger.info("A MATRIZ DE ADJACÊNCIA AINDA NÃO FOI CRIADA! LEIA UM ARQUIVO OU ADICIONE VÉRTICES E ARESTAS!")
-
-
+            logger.info("A LISTA DE ADJACÊNCIA AINDA NÃO FOI CRIADA!")
 
     def imprimeRelacaoVertices(self):
         """
-        EXIBE A MATRIZ DE ADJACÊNCIA DO GRAFO.
+        EXIBE OS VÉRTICES E OS SEUS RESPECTIVOS NOMES
         """
 
-        logger.info("A MATRIZ DE ADJACÊNCIA É: ")
+        logger.info("VÉRTICES E NOMES DOS LIVROS:")
         for num, nome in self.livros.items():
             print(f"{num} --> {nome}")
+
 
     def insereAresta(self, vertice_origem: int, vertice_destino: int, peso: int = 1):
         """
@@ -78,14 +72,10 @@ class TGrafoND:
         """
 
         try:
-            # ADICIONA UMA ARESTA ENTRE U E V (NÃO DIRIGIDO)
-            self.grafo[vertice_origem][vertice_destino] = peso
-            self.grafo[vertice_destino][vertice_origem] = peso
+            self.grafo[vertice_origem].append((vertice_destino, peso))
+            self.grafo[vertice_destino].append((vertice_origem, peso))
+            logger.info(f"ARESTA INSERIDA ENTRE {vertice_origem} E {vertice_destino} COM PESO {peso}.")
             
-            # INFORMA A INSERÇÃO E MOSTRA A MATRIZ DE ADJACÊNCIA ATUALIZADA
-            logger.info(
-                f"ARESTA INSERIDA ENTRE OS VÉRTICES {vertice_origem} E {vertice_destino} COM PESO {peso}."
-            )
         except Exception:
             logger.error(
                 f"ERRO AO INSERIR ARESTA ENTRE OS VÉRTICES {vertice_origem} E {vertice_destino}."
@@ -102,25 +92,23 @@ class TGrafoND:
         """
 
         # REMOVE A ARESTA ENTRE U E V (NÃO DIRIGIDO)
-        self.grafo[vertice_origem][vertice_destino] = 0
-        self.grafo[vertice_destino][vertice_origem] = 0
+        self.grafo[vertice_origem] = [
+            (v, p) for v, p in self.grafo[vertice_origem] if v != vertice_destino
+        ]
+        self.grafo[vertice_destino] = [
+            (v, p) for v, p in self.grafo[vertice_destino] if v != vertice_origem
+        ]
+        logger.info(f"ARESTA REMOVIDA ENTRE {vertice_origem} E {vertice_destino}.")
 
-        # INFORMA A REMOÇÃO E MOSTRA A MATRIZ DE ADJACÊNCIA ATUALIZADA
-        logger.info(
-            f"ARESTA REMOVIDA ENTRE OS VÉRTICES {vertice_origem} E {vertice_destino}."
-        )
 
-    def insereVertice(self):
+    def insereVertice(self, nome_livro: str):
         """
         INSERE UM NOVO VÉRTICE NO GRAFO.
         """
 
+        self.livros[self.vertices] = nome_livro
+        logger.info(f"VÉRTICE {self.vertices} - '{nome_livro}' INSERIDO.")
         self.vertices += 1
-
-        # ADICIONA UMA NOVA LINHA E COLUNA COM 0 PARA A NOVA MATRIZ DE ADJACÊNCIA
-        self.grafo.append([0] * self.vertices)
-        for i in range(self.vertices-1):
-            self.grafo[i].append(0)
 
         self.imprimeGrafo()
         logger.info(f"VÉRTICE {self.vertices-1} INSERIDO COM SUCESSO.")
@@ -133,20 +121,13 @@ class TGrafoND:
             vertice (int): O ÍNDICE DO VÉRTICE A SER REMOVIDO (1-INDEXADO).
         """
 
-        # REMOVE A LINHA DO VÉRTICE
-        self.grafo.pop(vertice)
-
-        # REMOVE A COLUNA DO VÉRTICE EM CADA LINHA RESTANTE
-        for i in range(len(self.grafo)):
-            self.grafo[i].pop(vertice)
-
-        # ATUALIZAR O NÚMERO DE VÉRTICES
+        if vertice in self.grafo:
+            del self.grafo[vertice]  # Remove o vértice da lista de adjacência
+        for vizinhos in self.grafo.values():
+            vizinhos[:] = [(v, p) for v, p in vizinhos if v != vertice]
+        self.livros.pop(vertice, None)
         self.vertices -= 1
-
-        # INFORMA A REMOÇÃO E MOSTRA A MATRIZ DE ADJACÊNCIA ATUALIZADA
-        logger.success(
-            f"VÉRTICE {vertice} E TODAS AS ARESTAS ASSOCIADAS FORAM REMOVIDAS."
-        )
+        logger.success(f"VÉRTICE {vertice} REMOVIDO.")
 
     def leArquivo(self, arquivo: str):
         """
@@ -160,25 +141,13 @@ class TGrafoND:
                 linhas = f.readlines()
 
             self.vertices = int(linhas[1].strip())
-            self.grafo = [[0] * self.vertices for _ in range(self.vertices)]
+            for linha in linhas[2:self.vertices + 2]:
+                vertice, nome_livro = linha.strip().split(' "')
+                self.livros[int(vertice)] = nome_livro
 
-            for linha in linhas[2 : self.vertices + 2]:
-                dados = linha.strip().split(' "')
-                if len(dados) >= 2:
-                    vertice = int(dados[0])
-                    nome_livro = dados[1]
-                    self.livros[vertice] = nome_livro
-
-            for linha in linhas[self.vertices + 3 :]:
-                dados = linha.strip().split(" ")
-                vertice_origem, vertice_destino, peso = (
-                    int(dados[0]),
-                    int(dados[1]),
-                    int(dados[2]),
-                )
-                self.insereAresta(vertice_origem, vertice_destino, peso)
-
-            logger.success("GRAFO CARREGADO COM SUCESSO A PARTIR DO ARQUIVO.")
+            for linha in linhas[self.vertices + 3:]:
+                origem, destino, peso = map(int, linha.split())
+                self.insereAresta(origem, destino, peso)
 
             self.imprimeGrafo()
 
@@ -199,18 +168,19 @@ class TGrafoND:
 
         print("Vértices e seus respectivos nomes:")
         for vertice, nome_livro in self.livros.items():
-            print(f"- Vértice {vertice}: {nome_livro.replace('"', "")}")
+            print(f"- Vértice {vertice}: {repr(nome_livro)}")
+
 
         print("---------------------------------------------------------------")
         print("\nArestas (conexões entre os vértices) e seus respectivos pesos:")
-        arestas = []
-        for i in range(self.vertices-1):
-            for j in range(i + 1, self.vertices-1):  # Para não repetir arestas
-                if self.grafo[i][j] != 0:
-                    arestas.append((i + 1, j + 1, self.grafo[i][j]))
+        arestas = set()
+        for origem, vizinhos in self.grafo.items():
+            for destino, peso in vizinhos:
+                if (destino, origem, peso) not in arestas:  # Evitar duplicatas
+                    arestas.add((origem, destino, peso))
                     print(
-                        f"- {self.livros[i + 1]} - {self.livros[j]} ---> Com peso: {j + 1}"
-                    )
+                        f"- {self.livros[origem]} - {self.livros[destino]} ---> Com peso: {peso}"
+                )
 
         if not arestas:
             print("Não há arestas neste grafo.")
@@ -230,20 +200,21 @@ class TGrafoND:
                 f.write(f"{self.vertices}\n")
 
                 for vertice, nome_livro in self.livros.items():
-                    f.write(f'{vertice} "{nome_livro.replace('"', "")}"\n')
+                    nome_formatado = nome_livro.translate(str.maketrans('', '', '"'))
+                    f.write(f'{vertice} "{nome_formatado}"\n')
 
-                num_arestas = 0
-                arestas = []
-                for i in range(self.vertices):
-                    for j in range(i + 1, self.vertices):
-                        if self.grafo[i][j] != 0:
-                            num_arestas += 1
-                            arestas.append(f"{i} {j} {self.grafo[i][j]}\n")
 
-                f.write(f"{num_arestas}\n")
+                
+                arestas = set()  # Evita duplicatas
+                for origem, vizinhos in self.grafo.items():
+                    for destino, peso in vizinhos:
+                        if (destino, origem, peso) not in arestas:
+                            arestas.add((origem, destino, peso))
 
-                for aresta in arestas:
-                    f.write(aresta)
+                f.write(f"{len(arestas)}\n") 
+
+                for origem, destino, peso in arestas:
+                    f.write(f"{origem} {destino} {peso}\n")
 
             logger.info(f"GRAFO GRAVADO COM SUCESSO NO ARQUIVO {arquivo}.")
         except Exception as e:
@@ -259,7 +230,7 @@ class TGrafoND:
         """
 
         # LISTA PARA MARCAR OS VÉRTICES VISITADOS
-        visitados = [False] * self.vertices
+        visitados = set()
 
         def busca_profundidade(v: int):
             """
@@ -268,23 +239,21 @@ class TGrafoND:
             Args:
                 v (int): O ÍNDICE DO VÉRTICE DE PARTIDA PARA A BUSCA EM PROFUNDIDADE.
             """
-            visitados[v] = True  # MARCA O VÉRTICE ATUAL COMO VISITADO
-            # PERCORRE OS VÉRTICES VIZINHOS DO VÉRTICE ATUAL
-            for i in range(self.vertices):
-                # SE HÁ UMA ARESTA E O VÉRTICE AINDA NÃO FOI VISITADO, CONTINUA A BUSCA
-                if self.grafo[v][i] == 1 and not visitados[i]:
-                    busca_profundidade(i)  # CHAMA A FUNÇÃO RECURSIVAMENTE PARA O VIZINHO
+            visitados.add(v)
+            for vizinho, _ in self.grafo[v]:
+                if vizinho not in visitados:
+                    busca_profundidade(vizinho)
 
         # INICIA A BUSCA EM PROFUNDIDADE A PARTIR DO VÉRTICE 0
         busca_profundidade(0)
 
         # VERIFICA SE TODOS OS VÉRTICES FORAM VISITADOS
-        if all(visitados):
-            logger.info("GRAFO É CONEXO")  # MENSAGEM DE QUE O GRAFO É CONEXO
-            return 0  # O GRAFO É CONEXO
+        if len(visitados) == self.vertices:
+            logger.info("O GRAFO É CONEXO.")
+            return 0
         else:
-            logger.info("GRAFO É DESCONEXO")  # MENSAGEM DE QUE O GRAFO É DESCONEXO
-            return 1  # O GRAFO É DESCONEXO
+            logger.info("O GRAFO É DESCONEXO.")
+            return 1
 
     def bfs(self, vertice_inicial: int, visitado: list) -> set:
         """
